@@ -38,21 +38,17 @@ module.exports = class StepDictionary {
       }
 
       if (fileData) {
-        let stepDefinitionMatches = fileData.match(/this.(Then|When|Given).*function\s?\(.*\)/g);
-        if (stepDefinitionMatches) {
-          stepDefinitionMatches.forEach((stepDefinition) => {
-            let stepRegex = stepDefinition.match(/\/.*\//)[0];
-            let lineNumber = fileData.substring(0, fileData.indexOf(stepRegex)).split('\n').length;
-            let keyword = stepDefinition.substring(5, stepDefinition.indexOf('('));
-            let regex = new RegExp(stepRegex.substring(1, stepRegex.length - 1));
+          var re = /@(given|then)\(\s*\/\^(.*)\$\/\).*\n*.*\((.*)\)/g,
+              definition;
+          while ((definition = re.exec(fileData)) !== null) {
             stepDefinitions.push({
-              regex: regex,
-              keyword: keyword,
-              params: stepDefinition.match(/function\s?\(.*\)/)[0].match(/\(.*\)/)[0],
+              keyword: definition[1],
+              regex: definition[2],
+              params: definition[3],
               file: filePath,
-              line: lineNumber
+              line: fileData.slice(0, definition.index).split(/\n/).length
             });
-          });
+          }
         }
       }
     });
